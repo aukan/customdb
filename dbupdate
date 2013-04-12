@@ -16,12 +16,20 @@ var updateTempFile = function updateTempFile (record) {
     var recordMatched = true;
 
     for( j=0; j < queryKeys.length; j++ ){
-        recordMatched &= (query[queryKeys[j]] == record[queryKeys[j]])
+        if (typeof(query[queryKeys[j]]) === 'string') {
+            recordMatched &= (query[queryKeys[j]] == record[queryKeys[j]])
+        } else if (query[queryKeys[j]]['$ne']) {
+            recordMatched &= (query[queryKeys[j]]['$ne'] != record[queryKeys[j]])
+        }
     }
 
     if ( recordMatched ) {
         updatesKeys.forEach( function (key) {
-            record[key] = updates[key];
+            if (typeof(updates[key]) === 'string') {
+                record[key] = updates[key];
+            } else if (updates[key]['$function']) {
+                record[key] = eval(updates[key]['$function'])(record);
+            }
         });
         recordsUpdated += 1;
     }
