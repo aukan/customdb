@@ -1,0 +1,73 @@
+#!/usr/bin/env node
+
+var fs = require('fs');
+
+// Read file
+var dbFile = fs.createReadStream(process.argv[2], { bufferSize: 64 * 1024 });
+
+var query = JSON.parse(process.argv[3]);
+var queryKeys = Object.keys(query);
+
+var updates = JSON.parse(process.argv[4]);
+var updatesKeys = Object.keys(updates);
+
+var recordBuffer = "";
+
+var recordsUpdated = 0;
+
+// Open files
+var dbFile = fs.createReadStream(process.argv[2]);
+var tempFile = fs.createWriteStream(process.argv[2] + '.temp');
+
+var update = function update (record) {
+    var recordMatched = true;
+
+    for( j=0; j < queryKeys.length; j++ ){
+        recordMatched &= (query[queryKeys[j]] == record[queryKeys[j]])
+    }
+
+    if ( recordMatched ) {
+        updatesKeys.forEach( function (key) {
+            record[key] = updates[key];
+        });
+        recordsUpdated += 1;
+    }
+
+    tempFile.write(JSON.stringify(record) + '\n');
+};
+
+// Filter based on query and write to stdout.
+dbFile.on('data', function(data, algo) {
+    var records, record;
+    var i, j;
+    var stringData = data.toString();
+    var limit;
+
+    records = stringData.split('\n');
+
+    if (records.length === 1) {
+        recordBuffer += stringData;
+        return;
+    } else if (recordBuffer.length > 0) {
+        records[0] = recordBuffer + records[0];
+        recordBuffer = "";
+    }
+
+    limit = records.length - 1;
+
+    for( i=0; i < limit; i+=1 ){
+        if (records[i].match(/{.*}/)) {
+            record = JSON.parse(records[i]);
+            update(record);
+        }
+    }
+
+    recordBuffer += records[limit];
+});
+
+dbFile.on('end', function () {
+    tempFile.end();
+    fs.rename(process.argv[2] + '.temp', process.argv[2], function () {
+        process.stdout.write('Updated ' + recordsUpdated + ' records.');
+    });
+});
