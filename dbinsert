@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+dbfile=$1
+
+if [ ! -f $dbfile ]
+then
+  echo "error: $dbfile db file does not exist!"
+  exit 1
+fi
+
+if ! test -t 0 ; then
+    while read records
+    do
+        echo $records >> $dbfile
+    done
+else
+    records=$2
+    echo $records >> $dbfile
+fi
