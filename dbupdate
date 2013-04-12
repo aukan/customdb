@@ -15,7 +15,7 @@ var recordsUpdated = 0;
 var updateTempFile = function updateTempFile (record) {
     var recordMatched = true;
 
-    for( j=0; j < queryKeys.length; j++ ){
+    for ( j=0; j < queryKeys.length; j++ ){
         if (typeof(query[queryKeys[j]]) === 'string') {
             recordMatched &= (query[queryKeys[j]] == record[queryKeys[j]])
         } else if (query[queryKeys[j]]['$ne']) {
