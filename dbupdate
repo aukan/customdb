@@ -1,29 +1,22 @@
 #!/usr/bin/env node
 
 var fs = require('fs');
-var iterateOnFile = require('./iterator.js').iterateOnFile;
 
-var query = JSON.parse(process.argv[3]);
-var queryKeys = Object.keys(query);
+var libdb = require('./libdb.js')
+var iterateOnFile = libdb.iterateOnFile;
+var recordMatched = libdb.recordMatched;
 
-var updates = JSON.parse(process.argv[4]);
+var query = eval('(' + process.argv[3] + ')');
+
+var updates = eval('(' + process.argv[4] + ')');
 var updatesKeys = Object.keys(updates);
 
 var tempFile = fs.createWriteStream(process.argv[2] + '.temp');
 var recordsUpdated = 0;
 
 var updateTempFile = function updateTempFile (record) {
-    var recordMatched = true;
 
-    for ( j=0; j < queryKeys.length; j++ ){
-        if (typeof(query[queryKeys[j]]) === 'string') {
-            recordMatched &= (query[queryKeys[j]] == record[queryKeys[j]])
-        } else if (query[queryKeys[j]]['$ne']) {
-            recordMatched &= (query[queryKeys[j]]['$ne'] != record[queryKeys[j]])
-        }
-    }
-
-    if ( recordMatched ) {
+    if ( recordMatched(record, query) ) {
         updatesKeys.forEach( function (key) {
             if (typeof(updates[key]) === 'string') {
                 record[key] = updates[key];

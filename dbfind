@@ -1,23 +1,14 @@
 #!/usr/bin/env node
 
-var iterateOnFile = require('./iterator.js').iterateOnFile;
+var libdb = require('./libdb.js')
+var iterateOnFile = libdb.iterateOnFile;
+var recordMatched = libdb.recordMatched;
 
 var query = eval('(' + process.argv[3] + ')');
-var queryKeys = Object.keys(query);
 
 var inspect = require('util').inspect;
 var find = function find (record) {
-    var recordMatched = true;
-
-    for( j=0; j < queryKeys.length; j++ ){
-        if (typeof(query[queryKeys[j]]) !== 'object') {
-            recordMatched &= (query[queryKeys[j]] === record[queryKeys[j]])
-        } else if (query[queryKeys[j]]['$ne']) {
-            recordMatched &= (query[queryKeys[j]]['$ne'] != record[queryKeys[j]])
-        }
-    }
-
-    if ( recordMatched ) {
+    if ( recordMatched(record, query) ) {
         process.stdout.write(JSON.stringify(record) + '\n');
     }
 };

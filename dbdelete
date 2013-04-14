@@ -1,23 +1,20 @@
 #!/usr/bin/env node
 
 var fs = require('fs');
-var iterateOnFile = require('./iterator.js').iterateOnFile;
 
-var query = JSON.parse(process.argv[3]);
-var queryKeys = Object.keys(query);
+var libdb = require('./libdb.js')
+var iterateOnFile = libdb.iterateOnFile;
+var recordMatched = libdb.recordMatched;
+
+var query = eval('(' + process.argv[3] + ')');
 
 var recordsUpdated = 0;
 
 var tempFile = fs.createWriteStream(process.argv[2] + '.temp');
 
 var removeToTemp = function remove (record) {
-    var recordMatched = true;
 
-    for( j=0; j < queryKeys.length; j++ ){
-        recordMatched &= (query[queryKeys[j]] == record[queryKeys[j]])
-    }
-
-    if ( !recordMatched ) {
+    if ( !recordMatched(record, query) ) {
         tempFile.write(JSON.stringify(record) + '\n');
     } else {
         recordsUpdated += 1;

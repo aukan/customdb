@@ -39,4 +39,21 @@ var iterateOnFile = function iterateOnFile (onIteration, onEnd) {
     dbFile.on('end', onEnd || function () {} );
 }
 
+var recordMatched = function recordMatched (record, query) {
+    var j;
+    var queryKeys = Object.keys(query);
+    var matched = true;
+
+    for( j=0; j < queryKeys.length; j++ ){
+        if (typeof(query[queryKeys[j]]) !== 'object') {
+            matched &= (query[queryKeys[j]] === record[queryKeys[j]])
+        } else if (query[queryKeys[j]]['$ne']) {
+            matched &= (query[queryKeys[j]]['$ne'] !== record[queryKeys[j]])
+        }
+    }
+
+    return matched;
+}
+
 exports.iterateOnFile = iterateOnFile;
+exports.recordMatched = recordMatched;
