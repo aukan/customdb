@@ -6,9 +6,22 @@ var recordMatched = libdb.recordMatched;
 
 var query = eval('(' + process.argv[3] + ')');
 
+var selectQuery = eval('(' + process.argv[4] + ')');
+selectQuery.id = 1; // Make sure id always is present.
+var selectQueryKeys = Object.keys(selectQuery);
+
 var inspect = require('util').inspect;
 var find = function find (record) {
+    var notRequestedKeys = [], i;
+
     if ( recordMatched(record, query) ) {
+
+        // Delete not requested keys.
+        notRequestedKeys = Object.keys(record).filter(function(i){ return selectQueryKeys.indexOf(i) < 0 })
+        for ( i=0; i < notRequestedKeys.length; i+= 1 ) {
+            delete( record[notRequestedKeys[i]] );
+        }
+
         process.stdout.write(JSON.stringify(record) + '\n');
     }
 };
