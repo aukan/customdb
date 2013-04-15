@@ -20,7 +20,7 @@ var updateTempFile = function updateTempFile (record) {
         updatesKeys.forEach( function (key) {
             if (typeof(updates[key]) === 'string') {
                 record[key] = updates[key];
-            } else if (updates[key]['$function']) {
+            } else if (updates[key].hasOwnProperty('$function')) {
                 record[key] = eval(updates[key]['$function'])(record);
             }
         });

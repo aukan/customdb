@@ -46,9 +46,9 @@ var recordMatched = function recordMatched (record, query) {
 
     for( j=0; j < queryKeys.length; j++ ){
         if (query[queryKeys[j]] === null || typeof(query[queryKeys[j]]) !== 'object') {
-            matched &= (query[queryKeys[j]] === record[queryKeys[j]])
-        } else if (query[queryKeys[j]]['$ne']) {
-            matched &= (query[queryKeys[j]]['$ne'] !== record[queryKeys[j]])
+            matched &= (query[queryKeys[j]] === record[queryKeys[j]]);
+        } else if (query[queryKeys[j]].hasOwnProperty('$ne')) {
+            matched &= (query[queryKeys[j]]['$ne'] !== record[queryKeys[j]]);
         }
     }
 
