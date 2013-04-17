@@ -18,10 +18,14 @@ var updateTempFile = function updateTempFile (record) {
 
     if ( recordMatched(record, query) ) {
         updatesKeys.forEach( function (key) {
-            if (typeof(updates[key]) === 'string') {
+            if (updates[key] !== null && typeof(updates[key]) === 'object') {
+              if( updates[key].hasOwnProperty('$function')) {
+                  record[key] = eval(updates[key]['$function'])(record);
+              } else {
+                  record[key] = updates[key];
+              }
+            } else {
                 record[key] = updates[key];
-            } else if (updates[key].hasOwnProperty('$function')) {
-                record[key] = eval(updates[key]['$function'])(record);
             }
         });
         recordsUpdated += 1;

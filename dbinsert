@@ -9,10 +9,7 @@ then
 fi
 
 if ! test -t 0 ; then
-    while read records
-    do
-        echo $records >> $dbfile
-    done
+    xargs -0 echo >> $dbfile
 else
     records=$2
     echo $records >> $dbfile
